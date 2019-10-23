@@ -82,6 +82,20 @@ if __name__ == "__main__":
         # 抢地主的状态
         elif code == "qdz":
             client.send("n")
+        elif code == "sqdz":
+            if data == "":
+                print("现在轮到上家抢地主")
+            elif data == "by":
+                print("上家不要地主")
+            elif data == "qdz":
+                print("上家抢地主")
+        elif code == "xqdz":
+            if data == "":
+                print("现在轮到下家抢地主")
+            elif data == "by":
+                print("下家不要地主")
+            elif data == "qdz":
+                print("下家抢地主")
         # 指定地主
         elif code == "dz":
             print("我是地主")

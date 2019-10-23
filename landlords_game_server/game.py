@@ -44,8 +44,15 @@ class GameLogic:
         for index in range(3):
             gamer_index = (self.point + index) % 3
             self.server.send_json(gamer_index, "qdz")
+            self.server.send_json((gamer_index + 1) % 3, "xqdz")
+            self.server.send_json((gamer_index + 2) % 3, "sqdz")
             if self.server.recv(gamer_index) == "y":
                 self.qdz_flags.append(str(gamer_index))
+                self.server.send_json((gamer_index + 1) % 3, "xqdz", "qdz")
+                self.server.send_json((gamer_index + 2) % 3, "sqdz", "qdz")
+            else:
+                self.server.send_json((gamer_index + 1) % 3, "xqdz", "by")
+                self.server.send_json((gamer_index + 2) % 3, "sqdz", "by")
         # 三个都不抢，重新发牌
         if len(self.qdz_flags) == 0:
             self.resend_num += 1
