@@ -73,21 +73,45 @@ class Client:
 
 
 class BackgroundThread(threading.Thread):
-    def __init__(self, threadID, name, client_):
+    def __init__(self, threadID, name, client_, msg_queue_):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.client_ = client_
+        self.msg_queue_ = msg_queue_
 
     def run(self):
         print("开始线程：" + self.name)
-        main_loop(self.client_)
+        main_loop(self.client_, self.msg_queue_)
         print("退出线程：" + self.name)
 
 
-def main_loop(client_):
+class MsgThread(threading.Thread):
+    def __init__(self, threadID, name, client_, msg_queue_):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.client_ = client_
+        self.msg_queue_ = msg_queue_
+
+    def run(self):
+        print("开始线程：" + self.name)
+        main_msg_loop(self.client_, self.msg_queue_)
+        print("退出线程：" + self.name)
+
+
+def main_msg_loop(client_, msg_queue_):
     while True:
-        dict_data = client_.recv_json()
+        data_ = client_.recv_json()
+        msg_queue_.put(data_)
+        print("消息队列入队：", data_)
+
+
+def main_loop(client_, msg_queue_):
+    while True:
+        if msg_queue_.empty():
+            continue
+        dict_data = msg_queue_.get()
         code = dict_data["code"]
         data = dict_data["data"]
         client.status = code
@@ -190,10 +214,13 @@ def main_loop(client_):
 
 if __name__ == "__main__":
     client = Client()
-    background_thread = BackgroundThread(1, "background_thread", client)
-    view_thread = client_gui.ViewThread(2, "view_thread", client)
+    msg_queue = queue.Queue()
+    msg_thread = MsgThread(1, "msg_thread", client, msg_queue)
+    background_thread = BackgroundThread(2, "background_thread", client, msg_queue)
+    #view_thread = client_gui.ViewThread(3, "view_thread", client)
+    msg_thread.start()
     background_thread.start()
-    view_thread.start()
+    #view_thread.start()
 
     while True:
         pass
