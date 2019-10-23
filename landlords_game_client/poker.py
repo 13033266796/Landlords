@@ -31,332 +31,53 @@ class PokerUtil:
         return pokers
 
 
-class PokerLogic:
-    # 检测牌的类型
-    @classmethod
-    def getPokerType(cls, myCards):
-        pokerType = None
-        if myCards != None:
-            if cls.isDan(myCards):
-                pokerType = "isDan"
-            elif cls.isDuiWang(myCards):
-                pokerType = "isDuiWang"
-            elif cls.isDuiZi(myCards):
-                pokerType = "isDuiZi"
-            elif cls.isZhaDan(myCards):
-                pokerType = "isZhaDan"
-            elif cls.isSanDaiYi(myCards):
-                pokerType = "isSanDaiYi"
-            elif cls.isSanBuDai(myCards):
-                pokerType = "isSanBuDai"
-            elif cls.isShunZi(myCards):
-                pokerType = "isShunZi"
-            elif cls.isLianDui(myCards):
-                pokerType = "isLianDui"
-            elif cls.isSiDaiEr(myCards):
-                pokerType = "isSiDaiEr"
-            elif cls.isFeiJi(myCards):
-                pokerType = "isFeiJi"
-        print(pokerType)
-        return pokerType
-
-    # 判断我方的牌是否存在能够管住上家的牌，决定是否显示出牌按钮
-    # 可以出牌返回TRUE 不能则返回false
-    # myCards我方所有的牌
-    # preCards上一家出的牌
-    @classmethod
-    def isOvercomePrev(cls, myCards, preCards):
-        # 获取上家出牌类型
-        prePokerType = cls.getPokerType(preCards)
-        print("myCards=", myCards, "   preCards=", preCards, "   prePokerType=", prePokerType)
-        if myCards == None or preCards == None:
-            return False
-        if prePokerType == None:
-            print("上一家出的牌不和法")
-            return False
-        # 将自己手中的牌和上一家出的牌从小到大进行排序
-        myCards = PokerUtil.sort_pokers(myCards)
-        preCards = PokerUtil.sort_pokers(preCards)
-        # 我手中的牌的个数
-        myCardsSize = len(myCards)
-        # 上一家出的牌的个数
-        preCardsSize = len(preCards)
-        # 我先出牌，上一家没有牌
-        if preCardsSize == 0 and myCardsSize != 0:
-            return True
-        # 判断对方是否是王炸
-        if cls.isDuiWang(preCards):
-            print("上一家出的是王炸，我方肯定吃不起")
-            return False
-        # 判断我方手上是否有对王
-        if myCardsSize >= 2:
-            list = []
-            list.append(myCards[myCardsSize - 1])
-            list.append((myCards[myCardsSize - 2]))
-            if cls.isDuiWang(list):
-                return True
-        # 判断对方不是炸弹，我出炸弹的情况
-        if cls.isZhaDan(preCards) == False:
-            if myCardsSize < 4:
-                return False
-            else:
-                for i in range(0, myCardsSize - 3):
-                    a = myCards[i].card_value
-                    b = myCards[i + 1].card_value
-                    c = myCards[i + 2].card_value
-                    d = myCards[i + 3].card_value
-                    if a == b and a == c and a == d:
-                        return True
-        # 取出上个玩家出的牌的第一张或就那一张
-        preValue = preCards[0].card_value
-        # 上家出单牌
-        if cls.isDan(preCards):
-            # 在自己方牌寻找一张逼对面大的牌
-            for i in range(0, myCardsSize):
-                myValue = myCards[i].card_value
-                if preValue < myValue:
-                    return True
-        # 上家出对子
-        elif cls.isDuiZi(preCards):
-            for i in range(0, myCardsSize - 1):
-                a = myCards[i].card_value
-                b = myCards[i + 1].card_value
-                if a == b:
-                    if a > preValue:
-                        return True
-
-        # 上家出三不带
-        elif cls.isSanBuDai(preCards):
-            # 三张牌可以大过上家的牌
-            for i in range(0, myCardsSize - 2):
-                a = myCards[i].card_value
-                b = myCards[i + 1].card_value
-                c = myCards[i + 2].card_value
-                if a == b and a == c:
-                    if a > preValue:
-                        return True
-        # 上家出三带一
-        elif cls.isSanDaiYi(preCards):
-            if myCardsSize < 4:
-                return False
-            # 三张牌可以大过上家的牌
-            for i in range(0, myCardsSize - 2):
-                a = myCards[i].card_value
-                b = myCards[i + 1].card_value
-                c = myCards[i + 2].card_value
-                # 由于是三带一取第二个值就没错
-                pre = preCards[1].card_value
-                if a == b and a == c:
-                    if a > pre:
-                        return True
-        # 上家出炸弹
-        elif cls.isZhaDan(preCards):
-            if myCardsSize < 4:
-                return False
-            # 找四张可以大过上家的牌
-            for i in range(0, myCardsSize - 3):
-                a = myCards[i].card_value
-                b = myCards[i + 1].card_value
-                c = myCards[i + 2].card_value
-                d = myCards[i + 3].card_value
-                if a == b and a == c and a == d:
-                    if a > preValue:
-                        return True
-        # 上家出四带二
-        elif cls.isSiDaiEr(preCards):
-            # 要有四张牌要大于上家的牌
-            for i in range(0, myCardsSize - 3):
-                a = myCards[i].card_value
-                b = myCards[i + 1].card_value
-                c = myCards[i + 2].card_value
-                d = myCards[i + 3].card_value
-                if a == b and a == c:
-                    return True
-        # 上家出的是顺子
-        elif cls.isShunZi(preCards):
-            if myCardsSize < preCardsSize:
-                return False
-            else:
-                for i in range(0, myCardsSize - preCardsSize + 1):
-                    list = []
-                    for j in range(0, preCardsSize):
-                        list.append(myCards[i + j])
-                    if cls.isShunZi(list):
-                        mymax = list[preCardsSize - 1].card_value
-                        premax = list[preCardsSize - 1].card_value
-                        if mymax > premax:
-                            return True
-        # 上家出的是连队
-        elif cls.isLianDui(preCards):
-            if myCardsSize < preCardsSize:
-                return False
-            else:
-                for i in range(0, myCardsSize - preCardsSize + 1):
-                    list = []
-                    for j in range(0, preCardsSize):
-                        list.append(myCards[i + j])
-                    if cls.isLianDui(list):
-                        mymax = list[preCardsSize - 1].card_value
-                        premax = list[preCardsSize - 1].card_value
-                        if mymax > premax:
-                            return True
-        # 上家出飞机
-        elif cls.isFeiJi(myCards):
-            if myCardsSize < preCardsSize:
-                return False
-            else:
-                for i in range(0, myCardsSize - preCardsSize + 1):
-                    list = []
-                    for j in range(0, preCardsSize):
-                        list.append(myCards[i + j])
-                    if cls.isFeiJi(list):
-                        mymax = list[4].card_value
-                        premax = list[4].card_value
-                        if mymax > premax:
-                            return True
-        return False
-
-    # myCards我想出的牌
-    # preCards上家出的牌
-    @classmethod
-    def comparePre(cls, myCards, preCards):
-        # 获取我和上家的出牌类型
-        myPokerType = cls.getPokerType(myCards)
-        prePokerType = cls.getPokerType(preCards)
-        print("myCards=", myCards, "   preCards=", preCards, "   prePokerType=", prePokerType, "myPokerType=",
-              myPokerType)
-        # 我的牌和上家的牌都不能为空
-        if myCards == None or preCards == None:
-            return False
-        if myPokerType == None or prePokerType == None:
-            return False
-        # 上一家牌的个数
-        prePokerSize = len(preCards)
-        # 我手中的牌的个数
-        myPokerSize = len(myCards)
-        # 如果上家没有牌 我先出牌
-        if preCards == 0 and myCards != 0:
-            return True
-        if cls.isDuiWang(preCards):
-            # 上家是对王 我肯定吃不起
-            return False
-        elif cls.isDuiWang(myCards):
-            # 我出对王 谁都吃的起
-            return True
-        # 我是炸弹对面不是炸弹
-        if cls.isZhaDan(preCards) == False and cls.isZhaDan(myCards):
-            return True
-        # 将自己想出的牌和上一家出的牌从小到大进行排序
-        myCards = PokerUtil.sort_pokers(myCards)
-        preCards = PokerUtil.sort_pokers(preCards)
-        # 得到我手中排序好的第一张
-        myCardValue0 = myCards[0].card_value
-        # 得到上家手中排序好的第一张
-        preCardValue0 = preCards[0].card_value
-        # 比较单牌
-        if cls.isDan(myCards) and cls.isDan(preCards):
-            # 单牌比较第一张
-            return myCardValue0 > preCardValue0
-        # 比较对子
-        elif cls.isDuiZi(myCards) and cls.isDuiZi(preCards):
-            # 对子只需比较第一张
-            return myCardValue0 > preCardValue0
-        # 比较三不带
-        elif cls.isSanBuDai(myCards) and cls.isSanBuDai(preCards):
-            # 三不带只需比较第一张
-            return myCardValue0 > preCardValue0
-        # 比较炸弹
-        elif cls.isZhaDan(myCards) and cls.isZhaDan(preCards):
-            # 炸弹只需比较第一张
-            return myCardValue0 > preCardValue0
-        # 比较三代一
-        elif cls.isSanDaiYi(myCards) and cls.isSanDaiYi(preCards):
-            # 三代一只需比较第二张
-            myValue = myCards[1].card_value
-            preValue = preCards[1].card_value
-            return myValue > preValue
-        # 比较四带二
-        elif cls.isSiDaiEr(myCards) and cls.isSiDaiEr(preCards):
-            # 四带二只需比较第三张
-            myValue = myCards[2].card_value
-            preValue = preCards[2].card_value
-            return myValue > preValue
-        # 比较顺子
-        elif cls.isShunZi(myCards) and cls.isShunZi(preCards):
-            # 顺子比较排序好的最大的哪一张
-            if prePokerSize != myPokerSize:
-                return False
-            else:
-                myMax = myCards[myPokerSize - 1].card_value
-                preMax = preCards[prePokerSize - 1].card_value
-                return myMax > preMax
-        # 比较连对
-        elif cls.isLianDui(myCards) and cls.isLianDui(preCards):
-            # 连对比较排序好的最大的哪一张
-            if prePokerSize != myPokerSize:
-                return False
-            else:
-                myMax = myCards[myPokerSize - 1].card_value
-                preMax = preCards[prePokerSize - 1].card_value
-                return myMax > preMax
-        # 比较飞机
-        elif cls.isFeiJi(myCards) and cls.isFeiJi(preCards):
-            if prePokerSize != myPokerSize:
-                return False
-            else:
-                myMax = myCards[4].card_value
-                preMax = preCards[4].card_value
-                return myMax > preMax
-        return False
-
+class PokerJudge:
     # 判断牌是否为单
     @classmethod
-    def isDan(myCards):
+    def isDan(cls, my_cards):
         flag = False
-        if myCards != None and len(myCards) == 1:
+        if my_cards is not None and len(my_cards) == 1:
             flag = True
         return flag
 
     # 判断牌是否为对子
     @classmethod
-    def isDuiZi(myCards):
+    def isDuiZi(cls, my_cards):
         flag = False
-        if myCards != None and len(myCards) == 2:
-            grade1 = myCards[0].card_value
-            grade2 = myCards[1].card_value
+        if my_cards is not None and len(my_cards) == 2:
+            grade1 = my_cards[0].card_value
+            grade2 = my_cards[1].card_value
             if grade1 == grade2:
                 flag = True
         return flag
 
     # 判断牌是否为3带1
     @classmethod
-    def isSanDaiYi(myCards):
-        flag = -1
-        if myCards != None and len(myCards) == 4:
-            myCards = PokerUtil.sort_pokers(myCards)
-            grades = []
-            grades[0] = myCards[0].card_value
-            grades[1] = myCards[1].card_value
-            grades[2] = myCards[2].card_value
-            grades[3] = myCards[3].card_value
+    def isSanDaiYi(cls, my_cards):
+        flag = False
+        if my_cards is not None and len(my_cards) == 4:
+            my_cards = PokerUtil.sort_pokers(my_cards)
+            a = my_cards[0].card_value
+            b = my_cards[1].card_value
+            c = my_cards[2].card_value
+            d = my_cards[3].card_value
 
-            if grades[1] == grades[0] and grades[2] == grades[0] and grades[3] == grades[0]:
-                return -1
-            elif grades[1] == grades[0] and grades[2] == grades[0]:
-                return 0;
-            elif grades[1] == grades[3] and grades[2] == grades[3]:
-                return 3
+            if a == b and a == c and a == d:
+                return False
+            elif a == b and a == c:
+                return True
+            elif d == c and d == b:
+                return True
         return flag
 
     # 判断牌是否为3不带
     @classmethod
-    def isSanBuDai(myCards):
+    def isSanBuDai(cls, my_cards):
         flag = False
-
-        if myCards != None and len(myCards) == 3:
-            grade0 = myCards[0].card_value
-            grade1 = myCards[1].card_value
-            grade2 = myCards[2].card_value
+        if my_cards is not None and len(my_cards) == 3:
+            grade0 = my_cards[0].card_value
+            grade1 = my_cards[1].card_value
+            grade2 = my_cards[2].card_value
 
             if grade0 == grade1 and grade2 == grade0:
                 flag = True
@@ -365,103 +86,97 @@ class PokerLogic:
 
     # 判断牌是否为顺子
     @classmethod
-    def isShunZi(myCards):
+    def isShunZi(cls, my_cards):
         flag = True
 
-        if myCards != None:
-            size = len(myCards)
+        if my_cards is not None:
+            size = len(my_cards)
             if size < 5 or size > 12:
                 return False
 
-            myCards = PokerUtil.sort_pokers(myCards)
+            my_cards = PokerUtil.sort_pokers(my_cards)
 
             for n in range(size - 1):
-                prev = myCards[n].card_value
-                next = myCards[n + 1].card_value
-                if prev == 17 or prev == 16 or prev == 15 or next == 17 \
-                        or next == 16 or next == 15:
+                prev_value = my_cards[n].card_value
+                next_value = my_cards[n + 1].card_value
+                if prev_value == 13 or prev_value == 14 or prev_value == 12 or next_value == 13 \
+                        or next_value == 14 or next_value == 12:
                     flag = False
                     break
                 else:
-                    if prev - next != -1:
+                    if prev_value - next_value != -1:
                         flag = False
                         break
-
         return flag
 
     # 判断是否为炸弹
     @classmethod
-    def isZhaDan(myCards):
+    def isZhaDan(cls, my_cards):
         flag = False
-        if myCards != None and len(myCards) == 4:
-            grades = []
-            grades[0] = myCards[0].card_value
-            grades[1] = myCards[1].card_value
-            grades[2] = myCards[2].card_value
-            grades[3] = myCards[3].card_value
+        if my_cards is not None and len(my_cards) == 4:
+            a = my_cards[0].card_value
+            b = my_cards[1].card_value
+            c = my_cards[2].card_value
+            d = my_cards[3].card_value
 
-            if grades[1] == grades[0] and grades[2] == grades[0] and grades[3] \
-                    == grades[0]:
+            if b == a and c == a and d == a:
                 flag = True
         return flag
 
     # 判断牌是否为王炸
     @classmethod
-    def isDuiWang(myCards):
+    def isDuiWang(cls, my_cards):
         flag = False
-
-        if myCards != None and len(myCards) == 2:
-            gradeOne = myCards[0].card_value
-            gradeTwo = myCards[1].card_value
-            if gradeOne + gradeTwo == 33:
+        if my_cards is not None and len(my_cards) == 2:
+            if my_cards[0].card_value + my_cards[1].card_value == 27:
                 flag = True
         return flag
 
     # 判断是否为连对
     @classmethod
-    def isLianDui(myCards):
+    def isLianDui(cls, my_cards):
         flag = True
-        if myCards == None:
+        if my_cards is not None:
             flag = False
             return flag
-        size = len(myCards)
+        size = len(my_cards)
         if size < 6 or size % 2 != 0:
             flag = False
         else:
-            myCards = PokerUtil.sort_pokers(myCards)
+            my_cards = PokerUtil.sort_pokers(my_cards)
             for i in range(0, size, 2):
-                if myCards[i].card_value != myCards[i + 1].card_value:
+                if my_cards[i].card_value != my_cards[i + 1].card_value:
                     flag = False
                     break
                 if i < size - 2:
-                    if myCards[i].card_value - myCards[i + 2].card_value != -1:
+                    if my_cards[i].card_value - my_cards[i + 2].card_value != -1:
                         flag = False
                         break
         return flag
 
     # 判断牌是否为飞机
     @classmethod
-    def isFeiJi(cls, myCards):
+    def isFeiJi(cls, my_cards):
         flag = False
-        if myCards != None:
-            size = len(myCards)
+        if my_cards is not None:
+            size = len(my_cards)
             if size >= 6:
-                myCards = PokerUtil.sort_pokers(myCards)
+                my_cards = PokerUtil.sort_pokers(my_cards)
                 if size % 3 == 0 and size % 4 != 0:
-                    flag = cls.isFeiJiBuDai(myCards)
+                    flag = cls.isFeiJiBuDai(my_cards)
                 elif size % 3 != 0 and size % 4 == 0:
-                    flag = cls.isFeiJiDai(myCards)
+                    flag = cls.isFeiJiDai(my_cards)
                 elif size == 12:
-                    flag = cls.isFeiJiBuDai(myCards) or cls.isFeiJiDai(myCards)
+                    flag = cls.isFeiJiBuDai(my_cards) or cls.isFeiJiDai(my_cards)
         return flag
 
     # 判断牌是否为飞机不带
     @classmethod
-    def isFeiJiBuDai(cls, myCards):
-        if myCards == None:
+    def isFeiJiBuDai(cls, my_cards):
+        if my_cards is not None:
             return False
 
-        size = len(myCards)
+        size = len(my_cards)
         n = size // 3
         grades = []
 
@@ -469,10 +184,10 @@ class PokerLogic:
             return False
         else:
             for i in range(n):
-                if cls.isSanBuDai(myCards[i * 3:i * 3 + 3]) == False:
+                if not cls.isSanBuDai(my_cards[i * 3:i * 3 + 3]):
                     return False
                 else:
-                    grades[i] = myCards[i * 3].card_value
+                    grades.append(my_cards[i * 3].card_value)
 
         for i in range(n - 1):
             if grades[i] == 15:
@@ -485,32 +200,313 @@ class PokerLogic:
 
     # 判断牌是否为飞机带
     @classmethod
-    def isFeiJiDai(cls, myCards):
-        size = len(myCards)
+    def isFeiJiDai(cls, my_cards):
+        size = len(my_cards)
         n = size // 4
-        i = 0
-        for i in range(0, size - 2, 3):
-            grade1 = myCards[i].card_value
-            grade2 = myCards[i + 1].card_value
-            grade3 = myCards[i + 2].card_value
+        for i in range(0, size - 2):
+            grade1 = my_cards[i].card_value
+            grade2 = my_cards[i + 1].card_value
+            grade3 = my_cards[i + 2].card_value
             if grade1 == grade2 and grade3 == grade1:
                 cards = []
                 for j in range(i, i + 3 * n):
-                    cards.append(myCards[j])
+                    cards.append(my_cards[j])
                 return cls.isFeiJiBuDai(cards)
         return False
 
     # 判断牌是否为4带2
     @classmethod
-    def isSiDaiEr(myCards):
+    def isSiDaiEr(cls, my_cards):
         flag = False
-        if myCards != None and len(myCards) == 6:
-            myCards = PokerUtil.sort_pokers(myCards)
+        if my_cards is not None and len(my_cards) == 6:
+            my_cards = PokerUtil.sort_pokers(my_cards)
             for i in range(3):
-                grade1 = myCards[i].card_value
-                grade2 = myCards[i + 1].card_value
-                grade3 = myCards[i + 2].card_value
-                grade4 = myCards[i + 3].card_value
+                grade1 = my_cards[i].card_value
+                grade2 = my_cards[i + 1].card_value
+                grade3 = my_cards[i + 2].card_value
+                grade4 = my_cards[i + 3].card_value
+
                 if grade2 == grade1 and grade3 == grade1 and grade4 == grade1:
                     flag = True
         return flag
+
+    # 检测牌的类型
+    @classmethod
+    def getPokerType(cls, my_cards):
+        poker_type = None
+        if my_cards is not None:
+            if cls.isDan(my_cards):
+                poker_type = "isDan"
+            elif cls.isDuiWang(my_cards):
+                poker_type = "isDuiWang"
+            elif cls.isDuiZi(my_cards):
+                poker_type = "isDuiZi"
+            elif cls.isZhaDan(my_cards):
+                poker_type = "isZhaDan"
+            elif cls.isSanDaiYi(my_cards):
+                poker_type = "isSanDaiYi"
+            elif cls.isSanBuDai(my_cards):
+                poker_type = "isSanBuDai"
+            elif cls.isShunZi(my_cards):
+                poker_type = "isShunZi"
+            elif cls.isLianDui(my_cards):
+                poker_type = "isLianDui"
+            elif cls.isSiDaiEr(my_cards):
+                poker_type = "isSiDaiEr"
+            elif cls.isFeiJi(my_cards):
+                poker_type = "isFeiJi"
+        print(poker_type)
+        return poker_type
+
+
+class PokerLogic:
+
+    # 判断我方的牌是否存在能够管住上家的牌，决定是否显示出牌按钮
+    # 可以出牌返回TRUE 不嫩则返回false
+    # myCards我方所有的牌
+    # preCards上一家出的牌
+    @classmethod
+    def isOvercomePrev(cls, my_cards, pre_cards):
+        # 获取上家出牌类型
+        pre_poker_type = PokerJudge.getPokerType(pre_cards)
+        print("myCards=", my_cards, "   preCards=", pre_cards, "   prePokerType=", pre_poker_type)
+        if my_cards is None or pre_cards is None:
+            return False
+        if pre_poker_type is None:
+            print("上一家出的牌不和法")
+            return False
+        # 将自己手中的牌和上一家出的牌从小到大进行排序
+        my_cards = PokerUtil.sort_pokers(my_cards)
+        pre_cards = PokerUtil.sort_pokers(pre_cards)
+        # 我手中的牌的个数
+        my_cards_size = len(my_cards)
+        # 上一家出的牌的个数
+        pre_cards_size = len(pre_cards)
+        # 我先出牌，上一家没有牌
+        if pre_cards_size == 0 and my_cards_size != 0:
+            return True
+        # 判断对方是否是王炸
+        if PokerJudge.isDuiWang(pre_cards):
+            print("上一家出的是王炸，我方肯定吃不起")
+            return False
+        # 判断我方手上是否有对王
+        if my_cards_size >= 2:
+            list = []
+            list.append(my_cards[my_cards_size - 1])
+            list.append((my_cards[my_cards_size - 2]))
+            if PokerJudge.isDuiWang(list):
+                return True
+        # 判断对方不是炸弹，我出炸弹的情况
+        if not PokerJudge.isZhaDan(pre_cards):
+            if my_cards_size < 4:
+                return False
+            else:
+                for i in range(0, my_cards_size - 3):
+                    a = my_cards[i].card_value
+                    b = my_cards[i + 1].card_value
+                    c = my_cards[i + 2].card_value
+                    d = my_cards[i + 3].card_value
+                    if a == b and a == c and a == d:
+                        return True
+        # 取出上个玩家出的牌的第一张或就那一张
+        pre_value = pre_cards[0].card_value
+        # 上家出单牌
+        if PokerJudge.isDan(pre_cards):
+            # 在自己方牌寻找一张逼对面大的牌
+            for i in range(0, my_cards_size):
+                my_value = my_cards[i].card_value
+                if pre_value < my_value:
+                    return True
+        # 上家出对子
+        elif PokerJudge.isDuiZi(pre_cards):
+            for i in range(0, my_cards_size - 1):
+                a = my_cards[i].card_value
+                b = my_cards[i + 1].card_value
+                if a == b:
+                    if a > pre_value:
+                        return True
+
+        # 上家出三不带
+        elif PokerJudge.isSanBuDai(pre_cards):
+            # 三张牌可以大过上家的牌
+            for i in range(0, my_cards_size - 2):
+                a = my_cards[i].card_value
+                b = my_cards[i + 1].card_value
+                c = my_cards[i + 2].card_value
+                if a == b and a == c:
+                    if a > pre_value:
+                        return True
+        # 上家出三带一
+        elif PokerJudge.isSanDaiYi(pre_cards):
+            if my_cards_size < 4:
+                return False
+            # 三张牌可以大过上家的牌
+            for i in range(0, my_cards_size - 2):
+                a = my_cards[i].card_value
+                b = my_cards[i + 1].card_value
+                c = my_cards[i + 2].card_value
+                # 由于是三带一取第二个值就没错
+                pre = pre_cards[1].card_value
+                if a == b and a == c:
+                    if a > pre:
+                        return True
+        # 上家出炸弹
+        elif PokerJudge.isZhaDan(pre_cards):
+            if my_cards_size < 4:
+                return False
+            # 找四张可以大过上家的牌
+            for i in range(0, my_cards_size - 3):
+                a = my_cards[i].card_value
+                b = my_cards[i + 1].card_value
+                c = my_cards[i + 2].card_value
+                d = my_cards[i + 3].card_value
+                if a == b and a == c and a == d:
+                    if a > pre_value:
+                        return True
+        # 上家出四带二
+        elif PokerJudge.isSiDaiEr(pre_cards):
+            # 要有四张牌要大于上家的牌
+            print("进入四带二")
+            for i in range(0, my_cards_size - 3):
+                a = my_cards[i].card_value
+                b = my_cards[i + 1].card_value
+                c = my_cards[i + 2].card_value
+                d = my_cards[i + 3].card_value
+                if a == b and a == c and a == d:
+                    return True
+        # 上家出的是顺子
+        elif PokerJudge.isShunZi(pre_cards):
+            if my_cards_size < pre_cards_size:
+                return False
+            else:
+                for i in range(0, my_cards_size - pre_cards_size + 1):
+                    list = []
+                    for j in range(0, pre_cards_size):
+                        list.append(my_cards[i + j])
+                    if PokerJudge.isShunZi(list):
+                        my_max = list[pre_cards_size - 1].card_value
+                        pre_max = list[pre_cards_size - 1].card_value
+                        if my_max > pre_max:
+                            return True
+        # 上家出的是连队
+        elif PokerJudge.isLianDui(pre_cards):
+            if my_cards_size < pre_cards_size:
+                return False
+            else:
+                for i in range(0, my_cards_size - pre_cards_size + 1):
+                    list = []
+                    for j in range(0, pre_cards_size):
+                        list.append(my_cards[i + j])
+                    if PokerJudge.isLianDui(list):
+                        my_max = list[pre_cards_size - 1].card_value
+                        pre_max = list[pre_cards_size - 1].card_value
+                        if my_max > pre_max:
+                            return True
+        # 上家出飞机
+        elif PokerJudge.isFeiJi(my_cards):
+            if my_cards_size < pre_cards_size:
+                return False
+            else:
+                for i in range(0, my_cards_size - pre_cards_size + 1):
+                    list = []
+                    for j in range(0, pre_cards_size):
+                        list.append(my_cards[i + j])
+                    if PokerJudge.isFeiJi(list):
+                        my_max = list[4].card_value
+                        pre_max = list[4].card_value
+                        if my_max > pre_max:
+                            return True
+        return False
+
+    # myCards我想出的牌
+    # preCards上家出的牌
+    @classmethod
+    def comparePre(cls, my_cards, pre_cards):
+        # 获取我和上家的出牌类型
+        my_poker_type = PokerJudge.getPokerType(my_cards)
+        pre_poker_type = PokerJudge.getPokerType(pre_cards)
+        print("myCards=", my_cards, "   preCards=", pre_cards, "   prePokerType=", pre_poker_type, "myPokerType=",
+              my_poker_type)
+        # 我的牌和上家的牌都不能为空
+        if my_cards is None or pre_cards is None:
+            return False
+        if my_poker_type is None or pre_poker_type is None:
+            return False
+        # 上一家牌的个数
+        pre_poker_size = len(pre_cards)
+        # 我手中的牌的个数
+        my_poker_size = len(my_cards)
+        # 如果上家没有牌 我先出牌
+        if pre_poker_size == 0 and my_poker_size != 0:
+            return True
+        if PokerJudge.isDuiWang(pre_cards):
+            # 上家是对王 我肯定吃不起
+            return False
+        elif PokerJudge.isDuiWang(my_cards):
+            # 我出对王 谁都吃的起
+            return True
+        # 我是炸弹对面不是炸弹
+        if not PokerJudge.isZhaDan(pre_cards) and PokerJudge.isZhaDan(my_cards):
+            return True
+        # 将自己想出的牌和上一家出的牌从小到大进行排序
+        my_cards = PokerUtil.sort_pokers(my_cards)
+        pre_cards = PokerUtil.sort_pokers(pre_cards)
+        # 得到我手中排序好的第一张
+        my_first_card_value = my_cards[0].card_value
+        # 得到上家手中排序好的第一张
+        pre_first_card_value = pre_cards[0].card_value
+        # 比较单牌
+        if PokerJudge.isDan(my_cards) and PokerJudge.isDan(pre_cards):
+            # 单牌比较第一张
+            return my_first_card_value > pre_first_card_value
+        # 比较对子
+        elif PokerJudge.isDuiZi(my_cards) and PokerJudge.isDuiZi(pre_cards):
+            # 对子只需比较第一张
+            return my_first_card_value > pre_first_card_value
+        # 比较三不带
+        elif PokerJudge.isSanBuDai(my_cards) and PokerJudge.isSanBuDai(pre_cards):
+            # 三不带只需比较第一张
+            return my_first_card_value > pre_first_card_value
+        # 比较炸弹
+        elif PokerJudge.isZhaDan(my_cards) and PokerJudge.isZhaDan(pre_cards):
+            # 炸弹只需比较第一张
+            return my_first_card_value > pre_first_card_value
+        # 比较三代一
+        elif PokerJudge.isSanDaiYi(my_cards) and PokerJudge.isSanDaiYi(pre_cards):
+            # 三代一只需比较第二张
+            my_value = my_cards[1].card_value
+            pre_value = pre_cards[1].card_value
+            return my_value > pre_value
+        # 比较四带二
+        elif PokerJudge.isSiDaiEr(my_cards) and PokerJudge.isSiDaiEr(pre_cards):
+            # 四带二只需比较第三张
+            my_value = my_cards[2].card_value
+            pre_value = pre_cards[2].card_value
+            return my_value > pre_value
+        # 比较顺子
+        elif PokerJudge.isShunZi(my_cards) and PokerJudge.isShunZi(pre_cards):
+            # 顺子比较排序好的最大的哪一张
+            if pre_poker_size != my_poker_size:
+                return False
+            else:
+                my_max = my_cards[my_poker_size - 1].card_value
+                pre_max = pre_cards[pre_poker_size - 1].card_value
+                return my_max > pre_max
+        # 比较连对
+        elif PokerJudge.isLianDui(my_cards) and PokerJudge.isLianDui(pre_cards):
+            # 连对比较排序好的最大的哪一张
+            if pre_poker_size != my_poker_size:
+                return False
+            else:
+                my_max = my_cards[my_poker_size - 1].card_value
+                pre_max = pre_cards[pre_poker_size - 1].card_value
+                return my_max > pre_max
+        # 比较飞机
+        elif PokerJudge.isFeiJi(my_cards) and PokerJudge.isFeiJi(pre_cards):
+            if pre_poker_size != my_poker_size:
+                return False
+            else:
+                my_max = my_cards[4].card_value
+                pre_max = pre_cards[4].card_value
+                return my_max > pre_max
+        return False
