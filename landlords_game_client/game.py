@@ -1,5 +1,6 @@
 import socket
 import json
+import _thread
 from poker import *
 
 HOST = 'localhost'
@@ -19,6 +20,7 @@ class Client:
         self.dz_index = -1
         # 各家剩余牌量
         self.pokers_size = [17, 17, 17]
+        self.status = "wait"
 
     # 发送数据
     def send(self, data_):
@@ -66,22 +68,22 @@ class Client:
             self.send_json("cp", cp_data)
 
 
-if __name__ == "__main__":
-    client = Client()
+def main_loop(client_):
     while True:
-        dict_data = client.recv_json()
+        dict_data = client_.recv_json()
         code = dict_data["code"]
         data = dict_data["data"]
+        client.status = code
         if code == "close":
             break
         elif code == "fp":
             print("收到牌：")
-            client.pokers = PokerUtil.get_pokers_from_data(data)
-            client.show_poker()
+            client_.pokers = PokerUtil.get_pokers_from_data(data)
+            client_.show_poker()
         # 抢地主的状态
         elif code == "qdz":
             print("到我抢地主了")
-            client.send("n")
+            client_.send("n")
         elif code == "sqdz":
             if data == "":
                 print("现在轮到上家抢地主")
@@ -101,47 +103,47 @@ if __name__ == "__main__":
             print("我是地主")
             print("地主牌：", data)
             dz_pokers = list(PokerUtil.get_pokers_from_data(data))
-            client.show_dz_poker()
+            client_.show_dz_poker()
             for poker in dz_pokers:
-                client.pokers.append(poker)
-            PokerUtil.sort_pokers(client.pokers)
+                client_.pokers.append(poker)
+            PokerUtil.sort_pokers(client_.pokers)
             print()
-            print("我的牌有：", len(client.pokers))
-            client.show_poker()
+            print("我的牌有：", len(client_.pokers))
+            client_.show_poker()
         # 指定农民
         elif code == "nm":
             print("我是农民")
             print("地主牌：", data)
             dz_pokers = PokerUtil.get_pokers_from_data(data)
-            client.show_dz_poker()
+            client_.show_dz_poker()
             print()
-            client.show_poker()
+            client_.show_poker()
         # 重新发牌
         elif code == "resend":
-            client.pokers.clear()
+            client_.pokers.clear()
             # pokers = list(PokerUtil.get_pokers_from_data(data))
         # 传输地主序号
         elif code == "dz_index":
-            client.dz_index = data
-            client.pokers_size[client.dz_index] = 20
+            client_.dz_index = data
+            client_.pokers_size[client_.dz_index] = 20
         # 出牌
         elif code == "cp":
             # todo 这里是玩家出牌数据
             cp_data = None
             if data == "":
-                client.send_cp_data(cp_data)
+                client_.send_cp_data(cp_data)
             else:
                 pre_cards = PokerUtil.get_pokers_from_data(data)
-                if PokerLogic.isOvercomePrev(client.pokers, pre_cards):
+                if PokerLogic.isOvercomePrev(client_.pokers, pre_cards):
                     if cp_data is not None:
                         # 判断是否可以吃牌
                         if PokerLogic.comparePre(PokerUtil.get_pokers_from_data(cp_data), pre_cards):
-                            client.send_cp_data(cp_data)
+                            client_.send_cp_data(cp_data)
                     else:
-                        client.send_cp_data(cp_data)
+                        client_.send_cp_data(cp_data)
                 # todo 这里直接过了，需要修改
                 else:
-                    client.send_cp_data(cp_data)
+                    client_.send_cp_data(cp_data)
         # 上家出牌
         elif code == "scp":
             # 过牌
@@ -149,14 +151,14 @@ if __name__ == "__main__":
                 print("上家过牌")
             else:
                 cards = PokerUtil.get_pokers_from_data(data)
-                client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(cards)
+                client_.pokers_size[(client_.index + 2) % 3] = client_.pokers_size[(client_.index + 2) % 3] - len(cards)
         # 下家出牌
         elif code == "xcp":
             if data == "gp":
                 print("下家过牌")
             else:
                 cards = PokerUtil.get_pokers_from_data(data)
-                client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(cards)
+                client_.pokers_size[(client_.index + 1) % 3] = client_.pokers_size[(client_.index + 1) % 3] - len(cards)
         # 有玩家已经出完牌
         elif code == "win":
             if data == "dz":
@@ -164,3 +166,7 @@ if __name__ == "__main__":
             if data == "nm":
                 print("农民胜利")
             break
+
+if __name__ == "__main__":
+    client = Client()
+    background_thread = _thread.start_new_thread(main_loop(client))
