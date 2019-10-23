@@ -1,6 +1,9 @@
 import socket
 import json
-import _thread
+import threading
+import client_gui
+import queue
+
 from poker import *
 
 HOST = 'localhost'
@@ -21,6 +24,7 @@ class Client:
         # 各家剩余牌量
         self.pokers_size = [17, 17, 17]
         self.status = "wait"
+        self.ready_gamer_num = 0
 
     # 发送数据
     def send(self, data_):
@@ -68,6 +72,19 @@ class Client:
             self.send_json("cp", cp_data)
 
 
+class BackgroundThread(threading.Thread):
+    def __init__(self, threadID, name, client_):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.client_ = client_
+
+    def run(self):
+        print("开始线程：" + self.name)
+        main_loop(self.client_)
+        print("退出线程：" + self.name)
+
+
 def main_loop(client_):
     while True:
         dict_data = client_.recv_json()
@@ -76,6 +93,9 @@ def main_loop(client_):
         client.status = code
         if code == "close":
             break
+        elif code == "ready":
+            client_.ready_gamer_num = int(data)
+            print(data, "玩家已连接")
         elif code == "fp":
             print("收到牌：")
             client_.pokers = PokerUtil.get_pokers_from_data(data)
@@ -167,6 +187,13 @@ def main_loop(client_):
                 print("农民胜利")
             break
 
+
 if __name__ == "__main__":
     client = Client()
-    background_thread = _thread.start_new_thread(main_loop(client))
+    background_thread = BackgroundThread(1, "background_thread", client)
+    view_thread = client_gui.ViewThread(2, "view_thread", client)
+    background_thread.start()
+    view_thread.start()
+
+    while True:
+        pass

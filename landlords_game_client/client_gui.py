@@ -6,61 +6,66 @@ import os
 import threading
 import time
 
+
 class Player(object):
-    def __init__(self,screen,pokers =[],identity = False):
+    def __init__(self, screen, pokers=[], identity=False):
         self.screen = screen
         self.pokers = pokers
-        self.pokers_duixiang = []
+        self.pokers_object = []
         self.identity = identity
-        self.send_pokers_list =[]
+        self.send_pokers_list = []
+
+    def set_pokers(self, pokers):
+        self.pokers = pokers
+        self.get_poker_object()
 
     # 用所得数据生成扑克对象
-    def get_poker_duixiang(self):
-        self.pokers_duixiang = []
+    def get_poker_object(self):
+        self.pokers_object = []
         for i in range(len(self.pokers)):
             value, type_poker, num = self.pokers[i].split(" ")
             # 图片名字获取
             name_image = type_poker + value
             # 创建poker对象并显示
-            startPositin = (1133 - ((len(self.pokers) - 1) * 50 + 105)) // 2  # 计算牌开始的水平位置，使自己所有的牌居中
-            poker = Poker(self.screen, i * 50 + startPositin, type_poker, value, num, str(name_image))
-            self.pokers_duixiang.append(poker)
+            start_position = (1133 - ((len(self.pokers) - 1) * 50 + 105)) // 2  # 计算牌开始的水平位置，使自己所有的牌居中
+            poker = Poker(self.screen, i * 50 + start_position, type_poker, value, num, str(name_image))
+            self.pokers_object.append(poker)
 
     # 显示自己的手牌
     def display(self):
-        for poker in self.pokers_duixiang:
+        for poker in self.pokers_object:
             poker.display()
 
     # 判断鼠标点击了哪张牌
-    def judge_poker_in_mouse(self,position):
+    def judge_poker_in_mouse(self, position):
         # 判断是哪张牌被选中
-        for poker in self.pokers_duixiang:
+        for poker in self.pokers_object:
             # 非最小的牌 只能点击不重复的部分
             pass
-            if (position[0] > poker.x and position[0] < poker.x + 50) and (
-                    position[1] > poker.y and position[1] < poker.y + 188):
-                if poker.statu == False:
+            if (poker.x < position[0] < poker.x + 50) and (
+                    poker.y < position[1] < poker.y + 188):
+                if not poker.statu:
                     poker.choosedStatu()  # 点击一张牌 成为选中状态
                 else:
                     poker.unChoosedStatu()  # 再次点击 恢复未选中状态
 
     # 本机玩家出牌
     def send_pokers(self):
-        i_list =[]
+        i_list = []
         self.send_pokers_list = []
         # 将选中的牌暂存，并记录下标以便删除手牌列表中的数据 实时更新手牌的数量和位置
-        for i in range(len(self.pokers_duixiang)):
-            if self.pokers_duixiang[i].statu == True:
+        for i in range(len(self.pokers_object)):
+            if self.pokers_object[i].statu:
                 i_list.append(i)
-                self.send_pokers_list.append(self.pokers_duixiang[i])
+                self.send_pokers_list.append(self.pokers_object[i])
         for i in i_list[::-1]:
-            self.pokers_duixiang.remove(self.pokers_duixiang[i])
+            self.pokers_object.remove(self.pokers_object[i])
             self.pokers.remove(self.pokers[i])
 
-        list = []
+        list_ = []
         for poker in self.send_pokers_list:
-            list.append(poker.value+" "+poker.type_poker+" "+poker.num)
-        return list
+            list_.append(poker.value + " " + poker.type_poker + " " + poker.num)
+        return list_
 
     # 显示出的牌
     def show_send_pokers(self):
@@ -68,10 +73,11 @@ class Player(object):
         for i in range(len(self.send_pokers_list)):
             self.send_pokers_list[i].display_with_xy(i * 50 + start_position, 380)
 
+
 class otherPlayer(object):
-    def __init__(self, temp_screen, x, identity= False):
-        self.x = x # 上家114  下家914
-        self.pokers = []# 其他玩家出牌列表
+    def __init__(self, temp_screen, x, identity=False):
+        self.x = x  # 上家114  下家914
+        self.pokers = []  # 其他玩家出牌列表
         self.screen = temp_screen
         self.identity = identity
         self.num = 17
@@ -79,18 +85,17 @@ class otherPlayer(object):
         self.font = pygame.font.Font(None, 60).render(str(self.num), True, (75, 175, 145))
 
     def confirmBoss(self):
-        self.identity = True # 是地主
+        self.identity = True  # 是地主
         self.num = 20
 
     def display(self):
         self.font = pygame.font.Font(None, 60).render(str(self.num), True, (75, 175, 145))
         self.image = pygame.image.load(r"source\pokerBack.png")
         self.image.blit(self.font, (30, 50))
-        self.screen.blit(self.image, (self.x, 200)) #牌背的位置
-
+        self.screen.blit(self.image, (self.x, 200))  # 牌背的位置
 
     def show_send_pokers_pre(self, pokers):
-        self.pokers_duixiang = []
+        self.pokers_object = []
         for i in range(len(pokers)):
 
             value, type_poker, num = pokers[i].split(" ")
@@ -99,26 +104,26 @@ class otherPlayer(object):
             # 创建poker对象并显示
             # startPositin = (1133 - ((len(self.pokers) - 1) * 50 + 105)) // 2  # 计算牌开始的水平位置，使自己所有的牌居中
             poker = Poker(self.screen, 111111, type_poker, value, num, str(name_image))
-            self.pokers_duixiang.append(poker)
+            self.pokers_object.append(poker)
             # 上家出牌布局
-            if len(self.pokers_duixiang) > 0 and len(self.pokers_duixiang) <= 6:
-                startposition = 239
-                for i in range(len(self.pokers_duixiang)):
-                    self.pokers_duixiang[i].display_with_xy(startposition + 20 * i, 200)
-            elif len(self.pokers_duixiang) > 6:
-                startposition = 239
-                for i in range(len(self.pokers_duixiang)):
+            if 0 < len(self.pokers_object) <= 6:
+                start_position = 239
+                for i in range(len(self.pokers_object)):
+                    self.pokers_object[i].display_with_xy(start_position + 20 * i, 200)
+            elif len(self.pokers_object) > 6:
+                start_position = 239
+                for i in range(len(self.pokers_object)):
                     if i <= 5:
-                        self.pokers_duixiang[i].display_with_xy(startposition + 20 * i, 200)
+                        self.pokers_object[i].display_with_xy(start_position + 20 * i, 200)
                     elif i >= 6 and i <= 11:
-                        self.pokers_duixiang[i].display_with_xy(startposition + 20 * (i - 6), 250)
+                        self.pokers_object[i].display_with_xy(start_position + 20 * (i - 6), 250)
                     elif i >= 12 and i <= 17:
-                        self.pokers_duixiang[i].display_with_xy(startposition + 20 * (i - 12), 300)
+                        self.pokers_object[i].display_with_xy(start_position + 20 * (i - 12), 300)
                     else:
-                        self.pokers_duixiang[i].display_with_xy(startposition + 20 * (i - 18), 350)
+                        self.pokers_object[i].display_with_xy(start_position + 20 * (i - 18), 350)
 
-    def show_send_pokers_next(self,pokers):
-        self.pokers_duixiang = []
+    def show_send_pokers_next(self, pokers):
+        self.pokers_object = []
         for i in range(len(pokers)):
             value, type_poker, num = pokers[i].split(" ")
             # 图片名字获取
@@ -127,48 +132,49 @@ class otherPlayer(object):
             # startPositin = (1133 - ((len(self.pokers) - 1) * 50 + 105)) // 2  # 计算牌开始的水平位置，使自己所有的牌居中
             poker = Poker(self.screen, 111111, type_poker, value, num, str(name_image))
             # print(poker)
-            self.pokers_duixiang.append(poker)
-        #下家出牌布局
-        if len(self.pokers_duixiang) > 0 and len(self.pokers_duixiang) <= 6 :
-            startposition = 789 - 20*(len(self.pokers_duixiang)-1)
-            for i in range(len(self.pokers_duixiang)):
-                self.pokers_duixiang[i].display_with_xy(startposition+20*i,200)
-        elif len(self.pokers_duixiang) >6 :
-            startposition = 789 - 20 *( 6 - 1)
-            for i in range(len(self.pokers_duixiang)):
+            self.pokers_object.append(poker)
+        # 下家出牌布局
+        if len(self.pokers_object) > 0 and len(self.pokers_object) <= 6:
+            startposition = 789 - 20 * (len(self.pokers_object) - 1)
+            for i in range(len(self.pokers_object)):
+                self.pokers_object[i].display_with_xy(startposition + 20 * i, 200)
+        elif len(self.pokers_object) > 6:
+            startposition = 789 - 20 * (6 - 1)
+            for i in range(len(self.pokers_object)):
                 if i <= 5:
-                    self.pokers_duixiang[i].display_with_xy(startposition + 20 * i, 200)
-                elif i >= 6 and i <=11:
-                    self.pokers_duixiang[i].display_with_xy(startposition + 20 * (i-6), 250)
+                    self.pokers_object[i].display_with_xy(startposition + 20 * i, 200)
+                elif i >= 6 and i <= 11:
+                    self.pokers_object[i].display_with_xy(startposition + 20 * (i - 6), 250)
                 elif i >= 12 and i <= 17:
-                    self.pokers_duixiang[i].display_with_xy(startposition + 20 * (i-12), 300)
+                    self.pokers_object[i].display_with_xy(startposition + 20 * (i - 12), 300)
                 else:
-                    self.pokers_duixiang[i].display_with_xy(startposition + 20 * (i-18), 350)
+                    self.pokers_object[i].display_with_xy(startposition + 20 * (i - 18), 350)
 
     def clearPokers(self):
-        self.pokers_duixiang = []
+        self.pokers_object = []
+
 
 class Poker(object):
-    def __init__(self,temp_screen,x,type_poker,value,num,name_image,statu = False,y = 550):
+    def __init__(self, temp_screen, x, type_poker, value, num, name_image, statu=False, y=550):
         self.type_poker = type_poker
         self.x = x
         self.y = y
         self.num = num
         self.value = value
-        self.statu = statu #纸牌的状态 是否选中 默认未选中
+        self.statu = statu  # 纸牌的状态 是否选中 默认未选中
         self.screen = temp_screen
         path = ".\\source\\pokers2\\" + name_image + ".jpg"
         # self.image = pygame.image.load(r"C:\Users\92931\Desktop\poker2.png")
         self.image = pygame.image.load(path)
 
-
     def __str__(self):
-        return "%s %s"%(self.type_poker,self.num)
+        return "%s %s" % (self.type_poker, self.num)
 
     def display(self):
         self.screen.blit(self.image, (self.x, self.y))
-    def display_with_xy(self,x,y):
-        self.screen.blit(self.image,(x,y))
+
+    def display_with_xy(self, x, y):
+        self.screen.blit(self.image, (x, y))
 
     def choosedStatu(self):
         self.statu = True
@@ -179,8 +185,9 @@ class Poker(object):
         self.statu = False
         self.y = self.y + 50
 
+
 class DiPai(object):
-    def __init__(self,screen,pokers):
+    def __init__(self, screen, pokers):
         self.pokers = pokers
         self.pokers_duixiang = []
         self.screen = screen
@@ -193,19 +200,21 @@ class DiPai(object):
             name_image = type_poker + value
             # 创建poker对象并显示
             startPositin = (1133 - (3 * 105 + 150)) // 2  # 计算牌开始的水平位置，使自己所有的牌居中
-            poker = Poker(self.screen, i * 150 + startPositin, type_poker, value,num, str(name_image),y=0)
+            poker = Poker(self.screen, i * 150 + startPositin, type_poker, value, num, str(name_image), y=0)
             self.pokers_duixiang.append(poker)
 
     def display(self):
         if self.pokers_duixiang:
             for poker in self.pokers_duixiang:
                 poker.display()
-        else:# 未确认地主时的底牌
+        else:  # 未确认地主时的底牌
             startPositin = (1133 - (3 * 105 + 150)) // 2
             for i in range(3):
-                self.screen.blit(self.unkonw,(i * 150 + startPositin,0))
+                self.screen.blit(self.unkonw, (i * 150 + startPositin, 0))
 
-mypokers = ['Q x 9','8 m 5','2 f 12','K f 10','8 f 5','4 t 1','A f 11','8 t 5','9 f 6','9 m 6','6 f 3','3 x 0','6 x 3','3 f 0','3 m 0','2 x 12','K t 10']
+
+mypokers = ['Q x 9', '8 m 5', '2 f 12', 'K f 10', '8 f 5', '4 t 1', 'A f 11', '8 t 5', '9 f 6', '9 m 6', '6 f 3',
+            '3 x 0', '6 x 3', '3 f 0', '3 m 0', '2 x 12', 'K t 10']
 # 出牌指令
 # flag = False
 flag = True
@@ -214,19 +223,32 @@ flag_for_qiang = True
 
 set_boss = False
 
-def main():
+
+class ViewThread(threading.Thread):
+    def __init__(self, threadID, name, client_):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.client_ = client_
+
+    def run(self):
+        print("开始线程：" + self.name)
+        view_main(self.client_)
+        print("退出线程：" + self.name)
+
+
+def view_main(client_):
     global flag
     global flag_for_qiang
     global set_boss
     pygame.init()
     screen = pygame.display.set_mode([1133, 754])
     pygame.display.set_caption("斗地主")
-    backGround = pygame.image.load(r".\\source\\background\\backGround_1.png")  # 背景图
-    screen.blit(backGround, (0, 0))  # 设置背景图
-
+    back_ground = pygame.image.load(r".\\source\\background\\backGround_1.png")  # 背景图
+    screen.blit(back_ground, (0, 0))  # 设置背景图
     # 创建本机玩家
-    player = Player(screen, mypokers)
-    player.get_poker_duixiang()
+    player = Player(screen, client_.pokers)
+    player.get_poker_object()
     player.display()
     # 创建上家
     pre_player = otherPlayer(screen, 114)  # 114 -> 上家牌堆水平位置x
@@ -264,7 +286,7 @@ def main():
                         pre_player.confirmBoss()
                         set_boss = True
 
-        screen.blit(backGround, (0, 0))
+        screen.blit(back_ground, (0, 0))
         # 是否抢地主
         if flag_for_qiang:
             screen.blit(buttun_rob, (350, 450))
@@ -292,10 +314,10 @@ def main():
                 if flag:  # 出牌阶段 监听点击出牌按钮
                     if (position[0] > 350 and position[0] < 530) and (position[1] > 420 and position[1] < 488):
                         send_pokers = player.send_pokers()  # 返回 牌对象（已出） 列表
-                        player.get_poker_duixiang()
+                        player.get_poker_object()
                         flag = False  # 结束出牌
 
-        screen.blit(backGround, (0, 0))
+        screen.blit(back_ground, (0, 0))
         player.display()
         player.show_send_pokers()
 
@@ -313,8 +335,5 @@ def main():
         pygame.display.flip()
 
 
-
-
-
 if __name__ == "__main__":
-    main()
+    view_main()

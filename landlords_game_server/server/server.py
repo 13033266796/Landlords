@@ -24,6 +24,8 @@ class Server:
             self.connection.append(conn)
             # 发送玩家标号
             conn.send(str(index).encode())
+            for i in range(index + 1):
+                self.send_json(i, "ready", str(index + 1))
 
             print("连接数:", index + 1, sep="")
             print("新连接地址：", addr)
