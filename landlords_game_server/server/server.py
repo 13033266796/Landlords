@@ -20,19 +20,17 @@ class Server:
         for index in range(3):
             print("等待第", index + 1, "个客户端连接...", sep="")
             conn, addr = server.accept()
-
             self.connection.append(conn)
             # 发送玩家标号
             conn.send(str(index).encode())
-            for i in range(index):
-                self.send_json(i, "ready", str(index))
-
+            for i in range(index + 1):
+                self.send_json(i, "ready", str(index + 1))
             print("连接数:", index + 1, sep="")
             print("新连接地址：", addr)
 
     # 发送数据
     def send(self, index, data):
-        time.sleep(0.1)
+        time.sleep(0.3)
         self.connection[index].send(data.encode())
         # print(index, "发送", data)
 
