@@ -5,6 +5,7 @@ import client_gui
 import queue
 
 from poker import *
+from game_frame import *
 
 HOST = 'localhost'
 PORT = 9500
@@ -24,7 +25,6 @@ class Client:
         # 各家剩余牌量
         self.pokers_size = [17, 17, 17]
         self.status = "wait"
-        self.ready_gamer_num = 0
 
     # 发送数据
     def send(self, data_):
@@ -73,16 +73,17 @@ class Client:
 
 
 class BackgroundThread(threading.Thread):
-    def __init__(self, threadID, name, client_, msg_queue_):
+    def __init__(self, threadID, name, client_, msg_queue_, game_frame_):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
         self.client_ = client_
         self.msg_queue_ = msg_queue_
+        self.game_frame_ = game_frame_
 
     def run(self):
-        print("开始线程：" + self.name)
-        main_loop(self.client_, self.msg_queue_)
+        print("开始背景线程：" + self.name)
+        main_loop(self.client_, self.msg_queue_, game_frame)
         print("退出线程：" + self.name)
 
 
@@ -95,7 +96,7 @@ class MsgThread(threading.Thread):
         self.msg_queue_ = msg_queue_
 
     def run(self):
-        print("开始线程：" + self.name)
+        print("开始消息线程：" + self.name)
         main_msg_loop(self.client_, self.msg_queue_)
         print("退出线程：" + self.name)
 
@@ -107,7 +108,7 @@ def main_msg_loop(client_, msg_queue_):
         print("消息队列入队：", data_)
 
 
-def main_loop(client_, msg_queue_):
+def main_loop(client_, msg_queue_, game_frame_):
     while True:
         if msg_queue_.empty():
             continue
@@ -118,7 +119,7 @@ def main_loop(client_, msg_queue_):
         if code == "close":
             break
         elif code == "ready":
-            client_.ready_gamer_num = int(data)
+            game_frame.ready_gamer_num = int(data)
             print(data, "玩家已连接")
         elif code == "fp":
             print("收到牌：")
@@ -215,12 +216,13 @@ def main_loop(client_, msg_queue_):
 if __name__ == "__main__":
     client = Client()
     msg_queue = queue.Queue()
+    game_frame = GameFrame()
     msg_thread = MsgThread(1, "msg_thread", client, msg_queue)
-    background_thread = BackgroundThread(2, "background_thread", client, msg_queue)
-    #view_thread = client_gui.ViewThread(3, "view_thread", client)
+    background_thread = BackgroundThread(2, "background_thread", client, msg_queue,game_frame)
+    paint_thread = GameFrameThread(3,"paint_thread", game_frame)
     msg_thread.start()
     background_thread.start()
-    #view_thread.start()
+    paint_thread.start()
 
     while True:
         pass
