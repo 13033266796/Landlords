@@ -1,4 +1,5 @@
 import queue
+import time
 
 from client import *
 from game_frame import *
@@ -54,20 +55,28 @@ def main_loop():
             # client.show_poker()
         # 抢地主的状态
         elif code == "qdz":
+            client.last_time = time.time()
             print("到我抢地主了")
-            client.status = "fp"
-            time.sleep(20)
-            client.send("n")
+            client.now_gamer = "me"
+            client.status = "qdz"
+            # 允许发送消息
+            client.send_flag = True
         elif code == "sqdz":
             if data == "":
+                client.last_time = time.time()
+                client.now_gamer = "pre"
                 print("现在轮到上家抢地主")
+                client.status = "qdz"
             elif data == "by":
                 print("上家不要地主")
             elif data == "qdz":
                 print("上家抢地主")
         elif code == "xqdz":
             if data == "":
+                client.last_time = time.time()
+                client.now_gamer = "next"
                 print("现在轮到下家抢地主")
+                client.status = "qdz"
             elif data == "by":
                 print("下家不要地主")
             elif data == "qdz":

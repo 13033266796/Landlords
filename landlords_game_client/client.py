@@ -23,11 +23,25 @@ class Client:
         self.status = "wait"
         # 已经准备好的玩家数
         self.ready_gamer_num = 0
+        # 是否抢地主
+        self.qdz_result = "n"
+        # 回合最大时间
+        self.max_time = 30
+        # 回合开始时间
+        self.last_time = 0
+        # 是否可以发送消息
+        self.send_flag = False
+        self.now_gamer = ""
 
     # 发送数据
     def send(self, data_):
-        self.socket_.send(data_.encode())
-        print("发送数据", data_)
+        if self.send_flag:
+            self.socket_.send(data_.encode())
+            print("发送数据", data_)
+            # 发送完自动禁止发送下一条
+            self.send_flag = False
+        else:
+            print("发送被禁止")
 
     # json 组包
     def send_json(self, code_, data_=None):
