@@ -32,6 +32,12 @@ class PokerUtil:
 
 
 class PokerJudge:
+
+    # 第一家出牌检查牌是否规范
+    @classmethod
+    def firstPoker(cls, my_cards):
+        return cls.getPokerType(my_cards) is not None
+
     # 判断牌是否为单
     @classmethod
     def isDan(cls, my_cards):
@@ -371,18 +377,27 @@ class PokerLogic:
                 if a == b and a == c and a == d:
                     return True
         # 上家出的是顺子
+        # 上家出的是顺子
         elif PokerJudge.isShunZi(pre_cards):
-            if my_cards_size < pre_cards_size:
+            list_ = []
+            for j in range(0, my_cards_size):
+                list_.append(my_cards[j].card_value)
+            list_new = list(set(list_))
+            # 改为Poker对象作为元素
+            list_poker = []
+            for val in list_new:
+                list_poker.append(Poker("_ _ %s" % val))
+            PokerUtil.sort_pokers(list_poker)
+            my_size = len(list_poker)
+            if my_size < pre_cards_size:
                 return False
             else:
-                for i in range(0, my_cards_size - pre_cards_size + 1):
+                for i in range(0, my_size - pre_cards_size + 1):
                     list_ = []
                     for j in range(0, pre_cards_size):
-                        list_.append(my_cards[i + j])
+                        list_.append(list_poker[i + j])
                     if PokerJudge.isShunZi(list_):
-                        my_max = list_[pre_cards_size - 1].card_value
-                        pre_max = list_[pre_cards_size - 1].card_value
-                        if my_max > pre_max:
+                        if list_[pre_cards_size - 1].card_value > pre_cards[pre_cards_size - 1].card_value:
                             return True
         # 上家出的是连队
         elif PokerJudge.isLianDui(pre_cards):
@@ -395,7 +410,7 @@ class PokerLogic:
                         list_.append(my_cards[i + j])
                     if PokerJudge.isLianDui(list_):
                         my_max = list_[pre_cards_size - 1].card_value
-                        pre_max = list_[pre_cards_size - 1].card_value
+                        pre_max = pre_cards[pre_cards_size - 1].card_value
                         if my_max > pre_max:
                             return True
         # 上家出飞机
@@ -409,7 +424,7 @@ class PokerLogic:
                         list_.append(my_cards[i + j])
                     if PokerJudge.isFeiJi(list_):
                         my_max = list_[4].card_value
-                        pre_max = list_[4].card_value
+                        pre_max = pre_cards[4].card_value
                         if my_max > pre_max:
                             return True
         return False

@@ -54,9 +54,8 @@ class Client:
             print(poker_.encode())
 
     def send_cp_data(self, cp_data):
-        # todo
-        if cp_data is None:
-            print("出牌：", cp_data)
+        if cp_data is None or len(cp_data) == 0:
+            print("过牌")
             self.send_json("gp", "")
         else:
             pokers_ = PokerUtil.get_pokers_from_data(cp_data)
@@ -64,7 +63,7 @@ class Client:
             for poker_ in pokers_:
                 self.pokers.remove(poker_)
             print("出牌：", cp_data)
-            self.send_json("gp", cp_data)
+            self.send_json("cp", cp_data)
 
 
 if __name__ == "__main__":
@@ -81,6 +80,7 @@ if __name__ == "__main__":
             client.show_poker()
         # 抢地主的状态
         elif code == "qdz":
+            print("到我抢地主了")
             client.send("n")
         elif code == "sqdz":
             if data == "":
@@ -138,23 +138,22 @@ if __name__ == "__main__":
                         if PokerLogic.comparePre(PokerUtil.get_pokers_from_data(cp_data), pre_cards):
                             client.send_cp_data(cp_data)
                     else:
-                        # todo 这里直接过了，需要修改
-                        client.send_json("gp", "")
+                        client.send_cp_data(cp_data)
                 # todo 这里直接过了，需要修改
                 else:
-                    client.send_json("gp", "")
+                    client.send_cp_data(cp_data)
         # 上家出牌
         elif code == "scp":
             # 过牌
             if data == "gp":
-                pass
+                print("上家过牌")
             else:
                 cards = PokerUtil.get_pokers_from_data(data)
                 client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(cards)
         # 下家出牌
         elif code == "xcp":
             if data == "gp":
-                pass
+                print("下家过牌")
             else:
                 cards = PokerUtil.get_pokers_from_data(data)
                 client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(cards)
