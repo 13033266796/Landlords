@@ -65,12 +65,12 @@ class GameFrame:
 
     def draw_others_pokers(self):
         temp_text = str(self.client.pokers_size[(self.client.index + 2) % 3])
-        pre_font = pygame.font.Font(None, 60).render(r"" + temp_text, True, (75, 175, 145))
+        pre_font = pygame.font.SysFont("simhei", 60).render(r"" + temp_text, True, (75, 175, 145))
         pre_image = pygame.image.load(r"source\pokerBack.png")
         pre_image.blit(pre_font, (30, 50))
         self.screen.blit(pre_image, (114, 200))  # 牌背的位置
         temp_text = str(self.client.pokers_size[(self.client.index + 1) % 3])
-        next_font = pygame.font.Font(None, 60).render(r"" + temp_text, True, (75, 175, 145))
+        next_font = pygame.font.SysFont("simhei", 60).render(r"" + temp_text, True, (75, 175, 145))
         next_image = pygame.image.load(r"source\pokerBack.png")
         next_image.blit(next_font, (30, 50))
         self.screen.blit(next_image, (914, 200))  # 牌背的位置
@@ -79,17 +79,17 @@ class GameFrame:
         # 闹钟位置
         if self.client.now_gamer == "me":
             clock_image_me = pygame.image.load(r"source\clock.png")
-            me_font = pygame.font.Font(None, 60).render(str(self.gamer_time), True, (75, 175, 145))
+            me_font = pygame.font.SysFont("simhei", 40).render(str(self.gamer_time), True, (75, 175, 145))
             clock_image_me.blit(me_font, (18, 30))
             self.screen.blit(clock_image_me, (150, 450))
         elif self.client.now_gamer == "next":
             clock_image_next = pygame.image.load(r"source\clock.png")
-            next_font = pygame.font.Font(None, 60).render(str(self.gamer_time), True, (75, 175, 145))
+            next_font = pygame.font.SysFont("simhei", 40).render(str(self.gamer_time), True, (75, 175, 145))
             clock_image_next.blit(next_font, (18, 30))
             self.screen.blit(clock_image_next, (800, 200))
         elif self.client.now_gamer == "pre":
             clock_image_pre = pygame.image.load(r"source\clock.png")
-            pre_font = pygame.font.Font(None, 60).render(str(self.gamer_time), True, (75, 175, 145))
+            pre_font = pygame.font.SysFont("simhei", 40).render(str(self.gamer_time), True, (75, 175, 145))
             clock_image_pre.blit(pre_font, (18, 30))
             self.screen.blit(clock_image_pre, (250, 200))
 
