@@ -3,6 +3,7 @@ import time
 
 from client import *
 from game_frame import *
+from client_gui import *
 
 
 class BackgroundThread(threading.Thread):
@@ -145,7 +146,8 @@ def main_loop():
                 client.show_pokers_pre.clear()
             else:
                 client.show_pokers_pre = PokerUtil.get_pokers_from_data(data)
-                client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(client.show_pokers_pre)
+                client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(
+                    client.show_pokers_pre)
         # 下家出牌
         elif code == "xcp":
             client.status = "cp"
@@ -160,7 +162,8 @@ def main_loop():
                 client.show_pokers_next.clear()
             else:
                 client.show_pokers_next = PokerUtil.get_pokers_from_data(data)
-                client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(client.show_pokers_next)
+                client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(
+                    client.show_pokers_next)
             client.show_pokers_next_lock.release()
         # 有玩家已经出完牌
         elif code == "win":
@@ -171,8 +174,12 @@ def main_loop():
             client.win = data
             break
 
+
 if __name__ == "__main__":
-    client = Client()
+    ip = ""
+    while ip == "":
+        ip = input_ip()
+    client = Client(ip)
     msg_queue = queue.Queue()
     game_frame = GameFrame(client)
     msg_thread = MsgThread(1, "msg_thread")

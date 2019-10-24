@@ -11,9 +11,9 @@ BUF = 1024
 
 
 class Client:
-    def __init__(self):
+    def __init__(self, ip):
         self.socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket_.connect(ADDR)
+        self.socket_.connect((ip, PORT))
         self.index = int(self.socket_.recv(BUF).decode())
         print("玩家序号", self.index)
         self.pokers = []
