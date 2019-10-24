@@ -24,7 +24,7 @@ class Client:
         # 已经准备好的玩家数
         self.ready_gamer_num = 0
         # 是否抢地主
-        self.qdz_result = "n"
+        self.qdz_result = "_"
         # 回合最大时间
         self.max_time = 30
         # 回合开始时间

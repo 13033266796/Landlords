@@ -11,13 +11,15 @@ class GameFrame:
         self.back_ground = pygame.image.load(r".\\source\\background\\backGround_1.png")
         self.player_ready = pygame.image.load(r"source\ok.png")
         self.button_rob = pygame.image.load(r".\source\button\rob.png")  # 抢地主按钮
+        self.button_rob_a = pygame.image.load(r".\source\button\rob_a.png")  # 抢地主按下按钮
         self.button_un_rob = pygame.image.load(r".\source\button\unrob.png")  # 不抢按钮
+        self.button_un_rob_a = pygame.image.load(r".\source\button\unrob_a.png")  # 不抢按下按钮
         self.clock_image = pygame.image.load(r"source\clock.png")  # 闹钟图片
         self.boss_poker_back_image = pygame.image.load(r"source\pokerBack.png")  # 地主牌（牌背）
         self.screen = pygame.display.set_mode([1133, 754])
         self.screen.blit(self.back_ground, (0, 0))
-        self.position = []
         self.gamer_time = 0
+        self.events = []
         pygame.display.set_caption("斗地主")
         pygame.init()
 
@@ -74,7 +76,8 @@ class GameFrame:
                 self.gamer_time = 0
                 if now_time < self.client.last_time:
                     self.gamer_time = self.client.max_time
-            for event in pygame.event.get():
+            self.events = pygame.event.get()
+            for event in self.events:
                 if event.type == QUIT:
                     sys.exit()
             if self.client.status == "wait":
@@ -103,28 +106,34 @@ class GameFrame:
         self.draw_others_pokers()
 
     def qdz(self):
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                sys.exit()
+        for event in self.events:
             if self.client.now_gamer == "me":
                 if event.type == MOUSEBUTTONDOWN:
                     # 获取鼠标点击的区域
-                    self.position = pygame.mouse.get_pos()
-                    print("x:", self.position[0], "y", self.position[1])
-                    if (350 < self.position[0] < 450) and (450 < self.position[1] < 510):
-                        self.client.send("y")
-                    elif (500 < self.position[0] < 600) and (450 < self.position[1] < 510):
-                        self.client.send("n")
-                    break
+                    print("x:", event.pos[0], "y", event.pos[1])
+                    if (350 < event.pos[0] < 450) and (450 < event.pos[1] < 510):
+                        self.client.qdz_result = "y"
+                    elif (500 < event.pos[0] < 600) and (450 < event.pos[1] < 510):
+                        self.client.qdz_result = "n"
+                    if not self.client.qdz_result == "_":
+                        self.client.send(self.client.qdz_result)
+
         self.draw_back_ground()
         if self.client.now_gamer == "me":
-            self.screen.blit(self.button_rob, (350, 450))
-            self.screen.blit(self.button_un_rob, (500, 450))
+            if self.client.qdz_result == "_":
+                self.screen.blit(self.button_rob, (350, 450))
+                self.screen.blit(self.button_un_rob, (500, 450))
+            elif self.client.qdz_result == "y":
+                self.screen.blit(self.button_rob_a, (350, 450))
+                self.screen.blit(self.button_un_rob, (500, 450))
+            elif self.client.qdz_result == "n":
+                self.screen.blit(self.button_rob, (350, 450))
+                self.screen.blit(self.button_un_rob_a, (500, 450))
         self.draw_clock()
         self.draw_self_pokers()
         self.draw_others_pokers()
         self.draw_back_boss_poker()
-        if self.gamer_time <= 0:
+        if self.gamer_time <= 0 and self.client.now_gamer == "me":
             self.client.send("n")
 
 
