@@ -72,6 +72,8 @@ class GameLogic:
         else:
             for index in self.qdz_flags:
                 self.server.send_json(int(index), "qdz")
+                self.server.send_json((int(index) + 1) % 3, "sqdz")
+                self.server.send_json((int(index) + 2) % 3, "xqdz")
                 # 有人抢地主
                 if self.server.recv(int(index)) == "y":
                     self.dz_index = int(index)
@@ -127,12 +129,14 @@ class GameLogic:
     # 判断有玩家是否出完牌
     def win(self):
         for i in range(3):
+            print(i, "玩家剩余", len(self.gamers[i].pokers))
             if len(self.gamers[i].pokers) == 0:
+                self.server.send_json(i, "win", self.gamers[i].rule)
                 self.server.send_json((i + 1) % 3, "win", self.gamers[i].rule)
                 self.server.send_json((i + 2) % 3, "win", self.gamers[i].rule)
                 return True
-            else:
-                return False
+        else:
+            return False
 
 
 if __name__ == "__main__":

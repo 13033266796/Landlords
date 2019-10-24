@@ -144,7 +144,7 @@ class PokerJudge:
     @classmethod
     def isLianDui(cls, my_cards):
         flag = True
-        if my_cards is not None:
+        if my_cards is None:
             flag = False
             return flag
         size = len(my_cards)

@@ -1,5 +1,6 @@
 import socket
 import json
+import threading
 
 from poker import *
 
@@ -40,6 +41,7 @@ class Client:
         self.show_pokers = []  # 出的牌
         self.pre_pokers = []
         self.show_pokers_next = []  # 下家出的牌
+        self.show_pokers_next_lock = threading.Lock()
         self.show_pokers_pre = []  # 上家出的牌
         self.win = "_"
 
@@ -71,7 +73,13 @@ class Client:
 
     # json拆包
     def recv_json(self):
-        return json.loads(self.recv())
+        data_ = self.recv().split("__json__")
+        data_dicts = []
+        for data in data_:
+            if data == "":
+                continue
+            data_dicts.append(json.loads(data))
+        return data_dicts
 
     def show_poker(self):
         for poker_ in self.pokers:

@@ -225,6 +225,7 @@ class GameFrame:
             self.screen.blit(self.button_send, (350, 420))  # 出牌阶段显示出牌按钮
             self.screen.blit(self.button_pass_send_d, (500, 420))  # 出牌阶段显示不出按钮
 
+        self.client.show_pokers_next_lock.acquire()
         # 展示下家出牌
         if self.client.show_pokers_next:
             if len(self.client.show_pokers_next) <= 6:
@@ -246,7 +247,7 @@ class GameFrame:
                         self.screen.blit(poker_image, (start_position_next + 20 * (i - 12), 300))
                     else:
                         self.screen.blit(poker_image, (start_position_next + 20 * (i - 18), 350))
-
+        self.client.show_pokers_next_lock.release()
         # 展示上家出牌
         if self.client.show_pokers_pre:
             if len(self.client.show_pokers_pre) <= 6:
@@ -308,6 +309,10 @@ class GameFrame:
                 temp_path = self.client.dz_pokers[i].card_type + self.client.dz_pokers[i].card_text
                 boss_poker_image = pygame.image.load(r"source\\pokers2\\" + temp_path + ".jpg")
                 self.screen.blit(boss_poker_image, (i * 150 + startPositin_2, 0))
+        if self.gamer_time <= 0 and self.client.now_gamer == "me":
+            self.client.send_cp_data("")
+            self.client.send_poker_flag = "n"
+            self.client.position_list.clear()  # 清空
 
     def win(self):
         if self.client.win == "dz":

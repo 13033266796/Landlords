@@ -30,7 +30,7 @@ class Server:
 
     # 发送数据
     def send(self, index, data):
-        time.sleep(0.3)
+        data = data + "__json__"
         self.connection[index].send(data.encode())
         # print(index, "发送", data)
 

@@ -32,7 +32,8 @@ class MsgThread(threading.Thread):
 def main_msg_loop():
     while True:
         data_ = client.recv_json()
-        msg_queue.put(data_)
+        for data in data_:
+            msg_queue.put(data)
 
 
 def main_loop():
@@ -58,6 +59,7 @@ def main_loop():
             client.last_time = time.time()
             print("到我抢地主了")
             client.now_gamer = "me"
+            client.qdz_result = "_"
             client.status = "qdz"
             # 允许发送消息
             client.send_flag = True
@@ -147,8 +149,10 @@ def main_loop():
         # 下家出牌
         elif code == "xcp":
             client.status = "cp"
+            client.show_pokers_next_lock.acquire()
             if data == "cp":
                 client.last_time = time.time()
+
                 client.show_pokers_next.clear()
                 client.now_gamer = "next"
             elif data == "gp":
@@ -157,6 +161,7 @@ def main_loop():
             else:
                 client.show_pokers_next = PokerUtil.get_pokers_from_data(data)
                 client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(client.show_pokers_next)
+            client.show_pokers_next_lock.release()
         # 有玩家已经出完牌
         elif code == "win":
             if data == "dz":
