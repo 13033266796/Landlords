@@ -23,6 +23,9 @@ class GameFrame:
         self.boss_poker_back_image = pygame.image.load(r"source\pokerBack.png")  # 地主牌（牌背）
         self.pass_image = pygame.image.load(r"source\pass_3.png")
         self.rob_boss_image = pygame.image.load(r"source\rob_boss.png")
+        self.boss_image = pygame.image.load(r"source\boss.png")  # 地主标识
+        self.boss_win_image = pygame.image.load(r"source\boss_win.png")
+        self.farmer_win_image = pygame.image.load(r"source\farmer_win.png")
         self.screen = pygame.display.set_mode([1133, 754])
         self.screen.blit(self.back_ground, (0, 0))
         self.gamer_time = 0
@@ -112,6 +115,8 @@ class GameFrame:
                 self.qdz()
             elif self.client.status == "cp":
                 self.cp()
+            elif self.client.status == "win":
+                self.win()
             pygame.display.update()
 
     def wait(self):
@@ -282,7 +287,19 @@ class GameFrame:
                 temp_path = self.client.pokers[i].card_type + self.client.pokers[i].card_text
                 poker_image = pygame.image.load(r"source\\pokers2\\" + temp_path + ".jpg")
                 self.screen.blit(poker_image, (i * 50 + start_position, 550))
+
         self.draw_others_pokers()
+
+        # 绘制地主标志
+        # 本人
+        if self.client.dz_index == self.client.index:
+            self.screen.blit(self.boss_image, (114, 500))
+        # 下家
+        elif self.client.dz_index == (self.client.index + 1) % 3:
+            self.screen.blit(self.boss_image, (1050, 100))
+        # 上家
+        elif self.client.dz_index == (self.client.index + 2) % 3:
+            self.screen.blit(self.boss_image, (50, 100))
 
         if self.client.dz_pokers:
             # 地主牌位置
@@ -291,6 +308,12 @@ class GameFrame:
                 temp_path = self.client.dz_pokers[i].card_type + self.client.dz_pokers[i].card_text
                 boss_poker_image = pygame.image.load(r"source\\pokers2\\" + temp_path + ".jpg")
                 self.screen.blit(boss_poker_image, (i * 150 + startPositin_2, 0))
+
+    def win(self):
+        if self.client.win == "dz":
+            self.screen.blit(self.boss_win_image,(450,300)) # 地主获胜
+        elif self.client.win == "nm":
+            self.screen.blit(self.farmer_win_image, (450, 300))# 农民获胜
 
 
 class GameFrameThread(threading.Thread):

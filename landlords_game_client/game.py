@@ -163,8 +163,8 @@ def main_loop():
                 print("地主胜利")
             if data == "nm":
                 print("农民胜利")
+            client.win = data
             break
-
 
 if __name__ == "__main__":
     client = Client()

@@ -41,6 +41,7 @@ class Client:
         self.pre_pokers = []
         self.show_pokers_next = []  # 下家出的牌
         self.show_pokers_pre = []  # 上家出的牌
+        self.win = "_"
 
     # 发送数据
     def send(self, data_):
