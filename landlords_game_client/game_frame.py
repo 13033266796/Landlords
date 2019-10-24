@@ -32,6 +32,9 @@ class GameFrame:
         self.events = []
         pygame.display.set_caption("斗地主")
         pygame.init()
+        self.back_ground_sound = pygame.mixer.Sound("source\MusicEx_Exciting.ogg")
+        pygame.mixer.init()
+        self.back_ground_sound.play(-1)
 
     def draw_back_ground(self):
         self.screen.blit(self.back_ground, (0, 0))
@@ -316,9 +319,9 @@ class GameFrame:
 
     def win(self):
         if self.client.win == "dz":
-            self.screen.blit(self.boss_win_image,(450,300)) # 地主获胜
+            self.screen.blit(self.boss_win_image, (450, 300))  # 地主获胜
         elif self.client.win == "nm":
-            self.screen.blit(self.farmer_win_image, (450, 300))# 农民获胜
+            self.screen.blit(self.farmer_win_image, (450, 300))  # 农民获胜
 
 
 class GameFrameThread(threading.Thread):
