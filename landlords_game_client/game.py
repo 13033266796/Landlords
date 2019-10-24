@@ -89,11 +89,11 @@ def main_loop():
         elif code == "dz":
             print("我是地主")
             print("地主牌：", data)
-            dz_pokers = list(PokerUtil.get_pokers_from_data(data))
+            client.dz_pokers = list(PokerUtil.get_pokers_from_data(data))
             client.show_dz_poker()
-            for poker in dz_pokers:
+            for poker in client.dz_pokers:
                 client.pokers.append(poker)
-            PokerUtil.sort_pokers(client.pokers)
+            PokerUtil.sort_pokers(client.pokers, True)
             print()
             print("我的牌有：", len(client.pokers))
             client.show_poker()
@@ -101,7 +101,7 @@ def main_loop():
         elif code == "nm":
             print("我是农民")
             print("地主牌：", data)
-            dz_pokers = PokerUtil.get_pokers_from_data(data)
+            client.dz_pokers = PokerUtil.get_pokers_from_data(data)
             client.show_dz_poker()
             print()
             client.show_poker()
@@ -111,41 +111,52 @@ def main_loop():
             # pokers = list(PokerUtil.get_pokers_from_data(data))
         # 传输地主序号
         elif code == "dz_index":
+            client.last_time = time.time()
             client.dz_index = data
             client.pokers_size[client.dz_index] = 20
+            if client.dz_index == client.index:
+                client.now_gamer = "me"
+            elif client.dz_index == (client.index + 1) % 3:
+                client.now_gamer = "next"
+            else:
+                client.now_gamer = "pre"
+            client.status = "cp"
         # 出牌
         elif code == "cp":
-            # todo 这里是玩家出牌数据
-            cp_data = None
-            if data == "":
-                client.send_cp_data(cp_data)
-            else:
-                pre_cards = PokerUtil.get_pokers_from_data(data)
-                if PokerLogic.isOvercomePrev(client.pokers, pre_cards):
-                    if cp_data is not None:
-                        # 判断是否可以吃牌
-                        if PokerLogic.comparePre(PokerUtil.get_pokers_from_data(cp_data), pre_cards):
-                            client.send_cp_data(cp_data)
-                    else:
-                        client.send_cp_data(cp_data)
-                # todo 这里直接过了，需要修改
-                else:
-                    client.send_cp_data(cp_data)
+            client.last_time = time.time()
+            client.pre_pokers = PokerUtil.get_pokers_from_data(data)
+            client.show_pokers.clear()
+            client.send_poker_flag = "_"
+            client.status = "cp"
+            client.now_gamer = "me"
+            client.send_flag = True
         # 上家出牌
         elif code == "scp":
+            client.status = "cp"
+            if data == "cp":
+                client.last_time = time.time()
+                client.now_gamer = "pre"
+                client.show_pokers_pre.clear()
             # 过牌
-            if data == "gp":
+            elif data == "gp":
                 print("上家过牌")
+                client.show_pokers_pre.clear()
             else:
-                cards = PokerUtil.get_pokers_from_data(data)
-                client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(cards)
+                client.show_pokers_pre = PokerUtil.get_pokers_from_data(data)
+                client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(client.show_pokers_pre)
         # 下家出牌
         elif code == "xcp":
-            if data == "gp":
+            client.status = "cp"
+            if data == "cp":
+                client.last_time = time.time()
+                client.show_pokers_next.clear()
+                client.now_gamer = "next"
+            elif data == "gp":
                 print("下家过牌")
+                client.show_pokers_next.clear()
             else:
-                cards = PokerUtil.get_pokers_from_data(data)
-                client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(cards)
+                client.show_pokers_next = PokerUtil.get_pokers_from_data(data)
+                client.pokers_size[(client.index + 1) % 3] = client.pokers_size[(client.index + 1) % 3] - len(client.show_pokers_next)
         # 有玩家已经出完牌
         elif code == "win":
             if data == "dz":

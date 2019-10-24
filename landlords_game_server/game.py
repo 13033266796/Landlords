@@ -71,10 +71,10 @@ class GameLogic:
         # 有两个人以上抢了地主
         else:
             for index in self.qdz_flags:
-                self.server.send_json(index, "qdz")
+                self.server.send_json(int(index), "qdz")
                 # 有人抢地主
-                if self.server.recv(index) == "y":
-                    self.dz_index = index
+                if self.server.recv(int(index)) == "y":
+                    self.dz_index = int(index)
                     self.appoint_dz()
                     return 1
             # 没人抢地主，默认第一个抢地主的玩家为地主
@@ -87,7 +87,8 @@ class GameLogic:
             if int(self.dz_index) == int(index):
                 print("地主是：", index)
                 # 发牌给地主
-                self.gamers[index].pokers.append(cards)
+                for poker in cards:
+                    self.gamers[index].pokers.append(poker)
                 # 指定身份
                 self.server.send_json(index, "dz", PokerUtil.encoder_poker(cards))
                 self.gamers[int(self.dz_index)].set_rule("dz")
@@ -106,8 +107,10 @@ class GameLogic:
             if b_pokers_gamer == next_gamer:
                 b_pokers = ""
             self.server.send_json(next_gamer, "cp", b_pokers)
+            self.server.send_json((next_gamer + 1) % 3, "scp", "cp")
+            self.server.send_json((next_gamer + 2) % 3, "xcp", "cp")
             poker_data = self.server.recv_json(next_gamer)
-            print(next_gamer, "玩家", poker_data)
+            print(next_gamer, "玩家出牌", poker_data)
             # 玩家出牌
             if poker_data["code"] == "cp":
                 b_pokers = poker_data["data"]

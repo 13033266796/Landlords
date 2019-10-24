@@ -12,11 +12,13 @@ class Poker:
 class PokerUtil:
     @classmethod
     def get_pokers_from_data(cls, data):
+        if data == "":
+            return []
         pokers = []
         pokers_data = data.split(",")
         for poker_ in pokers_data:
             pokers.append(Poker(poker_))
-        return cls.sort_pokers(pokers)
+        return cls.sort_pokers(pokers, True)
 
     @classmethod
     def encode_pokers(cls, pokers):
@@ -26,8 +28,8 @@ class PokerUtil:
         return ",".join(pokers_data)
 
     @classmethod
-    def sort_pokers(cls, pokers):
-        pokers.sort(key=lambda x: int(x.card_value), reverse=True)
+    def sort_pokers(cls, pokers, reverse_flag=False):
+        pokers.sort(key=lambda x: int(x.card_value), reverse=reverse_flag)
         return pokers
 
 

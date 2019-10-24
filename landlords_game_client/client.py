@@ -34,6 +34,13 @@ class Client:
         # 是否可以发送消息
         self.send_flag = False
         self.now_gamer = ""
+        # 被点起来的牌
+        self.position_list = []
+        self.send_poker_flag = "_"
+        self.show_pokers = []  # 出的牌
+        self.pre_pokers = []
+        self.show_pokers_next = []  # 下家出的牌
+        self.show_pokers_pre = []  # 上家出的牌
 
     # 发送数据
     def send(self, data_):
@@ -73,14 +80,14 @@ class Client:
         for poker_ in self.dz_pokers:
             print(poker_.encode())
 
-    def send_cp_data(self, cp_data):
-        if cp_data is None or len(cp_data) == 0:
+    def send_cp_data(self, pokers):
+        if pokers is None or len(pokers) == 0:
             print("过牌")
             self.send_json("gp", "")
         else:
-            pokers_ = PokerUtil.get_pokers_from_data(cp_data)
-            self.pokers_size[self.index] = self.pokers_size[self.index] - len(pokers_)
-            for poker_ in pokers_:
+            self.pokers_size[self.index] = self.pokers_size[self.index] - len(pokers)
+            for poker_ in pokers:
                 self.pokers.remove(poker_)
+            cp_data = PokerUtil.encode_pokers(pokers)
             print("出牌：", cp_data)
             self.send_json("cp", cp_data)
