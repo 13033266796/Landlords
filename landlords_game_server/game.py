@@ -1,8 +1,8 @@
-import random
-import queue
+import threading
 from gamer.gamer import *
 from poker.poker import *
 from server.server import *
+from server_view import *
 
 
 class GameLogic:
@@ -139,9 +139,28 @@ class GameLogic:
             return False
 
 
-if __name__ == "__main__":
+def server_main():
     game = GameLogic()
     game.init_gamer()
     game.send_poker()
     game.qdz()
     game.cp()
+
+
+class ServerThread(threading.Thread):
+    def __init__(self, threadID, name):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+
+    def run(self):
+        print("开始服务器线程：" + self.name)
+        server_main()
+        print("退出线程：" + self.name)
+
+
+if __name__ == "__main__":
+    server_thread = ServerThread(1, "server_thread")
+    server_thread.start()
+    server_ui()
+
