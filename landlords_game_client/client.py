@@ -25,6 +25,8 @@ class Client:
         self.ready_gamer_num = 0
         # 是否抢地主
         self.qdz_result = "_"
+        self.qdz_next_result = "_"
+        self.qdz_pre_result = "_"
         # 回合最大时间
         self.max_time = 30
         # 回合开始时间

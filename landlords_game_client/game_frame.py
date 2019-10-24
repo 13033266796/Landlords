@@ -16,6 +16,8 @@ class GameFrame:
         self.button_un_rob_a = pygame.image.load(r".\source\button\unrob_a.png")  # 不抢按下按钮
         self.clock_image = pygame.image.load(r"source\clock.png")  # 闹钟图片
         self.boss_poker_back_image = pygame.image.load(r"source\pokerBack.png")  # 地主牌（牌背）
+        self.pass_image = pygame.image.load(r"source\pass_3.png")
+        self.rob_boss_image = pygame.image.load(r"source\rob_boss.png")
         self.screen = pygame.display.set_mode([1133, 754])
         self.screen.blit(self.back_ground, (0, 0))
         self.gamer_time = 0
@@ -25,6 +27,23 @@ class GameFrame:
 
     def draw_back_ground(self):
         self.screen.blit(self.back_ground, (0, 0))
+
+    def draw_qdz(self):
+        if not self.client.qdz_result == "_" and not self.client.now_gamer == "me":
+            if self.client.qdz_result == "y":
+                self.screen.blit(self.rob_boss_image, (500, 400))
+            elif self.client.qdz_result == "n":
+                self.screen.blit(self.pass_image, (500, 400))
+        if not self.client.qdz_next_result == "_" and not self.client.now_gamer == "next":
+            if self.client.qdz_next_result == "y":
+                self.screen.blit(self.rob_boss_image, (764, 200))
+            elif self.client.qdz_next_result == "n":
+                self.screen.blit(self.pass_image, (764, 200))
+        if not self.client.qdz_pre_result == "_" and not self.client.now_gamer == "pre":
+            if self.client.qdz_pre_result == "y":
+                self.screen.blit(self.rob_boss_image, (250, 200))
+            elif self.client.qdz_pre_result == "n":
+                self.screen.blit(self.pass_image, (250, 200))
 
     def draw_self_pokers(self):
         start_position = (1133 - ((len(self.client.pokers) - 1) * 50 + 105)) // 2
@@ -129,6 +148,7 @@ class GameFrame:
             elif self.client.qdz_result == "n":
                 self.screen.blit(self.button_rob, (350, 450))
                 self.screen.blit(self.button_un_rob_a, (500, 450))
+        self.draw_qdz()
         self.draw_clock()
         self.draw_self_pokers()
         self.draw_others_pokers()

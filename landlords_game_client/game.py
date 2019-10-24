@@ -68,8 +68,10 @@ def main_loop():
                 print("现在轮到上家抢地主")
                 client.status = "qdz"
             elif data == "by":
+                client.qdz_pre_result = "n"
                 print("上家不要地主")
             elif data == "qdz":
+                client.qdz_pre_result = "y"
                 print("上家抢地主")
         elif code == "xqdz":
             if data == "":
@@ -78,8 +80,10 @@ def main_loop():
                 print("现在轮到下家抢地主")
                 client.status = "qdz"
             elif data == "by":
+                client.qdz_next_result = "n"
                 print("下家不要地主")
             elif data == "qdz":
+                client.qdz_next_result = "y"
                 print("下家抢地主")
         # 指定地主
         elif code == "dz":
