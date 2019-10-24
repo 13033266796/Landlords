@@ -2,7 +2,7 @@ import socket
 import json
 import time
 
-HOST = 'localhost'
+HOST = '10.5.248.142'
 PORT = 9500
 BUF = 1024
 ADDR = (HOST, PORT)

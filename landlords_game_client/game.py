@@ -167,6 +167,7 @@ def main_loop():
             client.show_pokers_next_lock.release()
         # 有玩家已经出完牌
         elif code == "win":
+            client.status = "win"
             if data == "dz":
                 print("地主胜利")
             if data == "nm":
@@ -176,10 +177,10 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    ip = ""
-    while ip == "":
-        ip = input_ip()
-    client = Client(ip)
+    # ip = ""
+    # while ip == "":
+    #     ip = input_ip()
+    client = Client("10.5.248.142")
     msg_queue = queue.Queue()
     game_frame = GameFrame(client)
     msg_thread = MsgThread(1, "msg_thread")
