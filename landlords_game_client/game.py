@@ -1,6 +1,4 @@
-import queue
-import time
-
+from queue import Queue
 from client import *
 from game_frame import *
 from client_gui import *
@@ -181,7 +179,7 @@ if __name__ == "__main__":
     while ip == "":
         ip = input_ip()
     client = Client(ip)
-    msg_queue = queue.Queue()
+    msg_queue = Queue()
     game_frame = GameFrame(client)
     msg_thread = MsgThread(1, "msg_thread")
     background_thread = BackgroundThread(2, "background_thread")
