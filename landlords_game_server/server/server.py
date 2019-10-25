@@ -1,29 +1,28 @@
 import socket
 import json
-import time
 
 HOST = ""
 PORT = 9500
 BUF = 1024
 
 
+def get_host_ip():
+    try:
+        socket_ = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        socket_.connect(('8.8.8.8', 80))
+        ip = socket_.getsockname()[0]
+    finally:
+        socket_.close()
+    return ip
+
+
 class Server:
     def __init__(self):
         self.connection = []
 
-    @classmethod
-    def get_host_ip(cls):
-        try:
-            socket_ = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            socket_.connect(('8.8.8.8', 80))
-            ip = socket_.getsockname()[0]
-        finally:
-            socket_.close()
-        return ip
-
     def wait_connect(self):
         global HOST
-        HOST = Server.get_host_ip()
+        HOST = get_host_ip()
         print(HOST)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind((HOST, PORT))
