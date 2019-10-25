@@ -177,9 +177,9 @@ def main_loop():
 
 
 if __name__ == "__main__":
-    ip = ""
-    while ip == "":
-        ip = input_ip()
+    # ip = ""
+    # while ip == "":
+    #     ip = input_ip()
     client = Client("10.5.248.142")
     msg_queue = queue.Queue()
     game_frame = GameFrame(client)
