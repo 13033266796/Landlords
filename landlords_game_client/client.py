@@ -38,11 +38,14 @@ class Client:
         # 被点起来的牌
         self.position_list = []
         self.send_poker_flag = "_"
-        self.show_pokers = []  # 出的牌
+
         self.pre_pokers = []
+        self.show_pokers = []  # 出的牌
+        self.show_pokers_lock = threading.Lock()
         self.show_pokers_next = []  # 下家出的牌
         self.show_pokers_next_lock = threading.Lock()
         self.show_pokers_pre = []  # 上家出的牌
+        self.show_pokers_pre_lock = threading.Lock()
         self.win = "_"
 
     # 发送数据

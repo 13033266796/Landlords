@@ -251,6 +251,7 @@ class GameFrame:
                     else:
                         self.screen.blit(poker_image, (start_position_next + 20 * (i - 18), 350))
         self.client.show_pokers_next_lock.release()
+        self.client.show_pokers_pre_lock.acquire()
         # 展示上家出牌
         if self.client.show_pokers_pre:
             if len(self.client.show_pokers_pre) <= 6:
@@ -272,7 +273,8 @@ class GameFrame:
                         self.screen.blit(poker_image, (start_position_pre + 20 * (i - 12), 300))
                     else:
                         self.screen.blit(poker_image, (start_position_pre + 20 * (i - 18), 350))
-
+        self.client.show_pokers_pre_lock.release()
+        self.client.show_pokers_lock.acquire()
         # 展示本机出牌
         if self.client.show_pokers:
             PokerUtil.sort_pokers(self.client.show_pokers)
@@ -281,6 +283,7 @@ class GameFrame:
                 temp_path = self.client.show_pokers[i].card_type + self.client.show_pokers[i].card_text
                 poker_image = pygame.image.load(r"source\\pokers2\\" + temp_path + ".jpg")
                 self.screen.blit(poker_image, (i * 50 + startPositin_3, 380))
+        self.client.show_pokers_lock.release()
 
         for i in range(len(self.client.pokers)):
             if i in self.client.position_list:

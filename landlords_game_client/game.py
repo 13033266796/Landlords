@@ -125,8 +125,10 @@ def main_loop():
         # 出牌
         elif code == "cp":
             client.last_time = time.time()
+            client.show_pokers_lock.acquire()
             client.pre_pokers = PokerUtil.get_pokers_from_data(data)
             client.show_pokers.clear()
+            client.show_pokers_lock.release()
             client.send_poker_flag = "_"
             client.status = "cp"
             client.now_gamer = "me"
@@ -134,6 +136,7 @@ def main_loop():
         # 上家出牌
         elif code == "scp":
             client.status = "cp"
+            client.show_pokers_pre_lock.acquire()
             if data == "cp":
                 client.last_time = time.time()
                 client.now_gamer = "pre"
@@ -146,6 +149,7 @@ def main_loop():
                 client.show_pokers_pre = PokerUtil.get_pokers_from_data(data)
                 client.pokers_size[(client.index + 2) % 3] = client.pokers_size[(client.index + 2) % 3] - len(
                     client.show_pokers_pre)
+            client.show_pokers_pre_lock.release()
         # 下家出牌
         elif code == "xcp":
             client.status = "cp"
