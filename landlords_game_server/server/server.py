@@ -1,15 +1,15 @@
 import socket
 import json
 
-HOST = ""
-PORT = 9500
-BUF = 1024
+HOST = "" # ip地址
+PORT = 9500 # 端口设置
+BUF = 1024 # 缓冲区大小
 
 
 def get_host_ip():
     try:
-        socket_ = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        socket_.connect(('8.8.8.8', 80))
+        socket_ = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # 使用协议
+        socket_.connect(('8.8.8.8', 80)) #访问外网 获取本地ip
         ip = socket_.getsockname()[0]
     finally:
         socket_.close()
@@ -24,8 +24,8 @@ class Server:
         global HOST
         HOST = get_host_ip()
         print(HOST)
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind((HOST, PORT))
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # 套接字家族，面向连接or非连接（AF_INET windows， SOCK_STREAM 面向连接）
+        server.bind((HOST, PORT)) # 绑定ip和端口
         server.listen(5)
 
         for index in range(3):
